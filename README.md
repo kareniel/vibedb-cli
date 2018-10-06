@@ -48,12 +48,13 @@ Subfolders:
 - **`/Playlists`**: Contains [`render`](#render)ed playlist (.m3u) files.
 
 
-#### Library Directory Structure
+### Library Directory Structure
 
 The current structure of `$library` is:
 
 ```
 /
+/Library
   /$prefix
     /$multihash
       $original-file-name
