@@ -31,6 +31,23 @@ export a m3u file listing every file in $library
 
 ## Reference
 
+### Configuration
+
+Create a yaml file called .vibedb in your home directory.
+If this file is not found, [`config.yaml`](./config.yaml) will be used. 
+
+### Music Folder
+
+Default path: `~/Dropbox/Apps/Vibedrive` 
+
+Subfolders: 
+
+- **`/Inbox`**: Put your music files in here before they can be [`import`](#import)ed.
+- **`/Unsupported`**: [`cleanup`](#cleanup) moves files with unsupported extension type here.
+- **`/Libray`**: Contains imported music files. Organized using the [library directory structure](#library-directory-structure).
+- **`/Playlists`**: Contains [`render`](#render)ed playlist (.m3u) files.
+
+
 #### Library Directory Structure
 
 The current structure of `$library` is:
