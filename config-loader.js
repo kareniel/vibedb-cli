@@ -26,7 +26,8 @@ config.subdir = {
   inbox: path.join(config.dir, 'Inbox'),
   library: path.join(config.dir, 'Library'),
   unsupported: path.join(config.dir, 'Unsupported'),
-  playlists: path.join(config.dir, 'Playlists')
+  playlists: path.join(config.dir, 'Playlists'),
+  database: path.join(config.dir, 'Database')
 }
 
 generateSubfolders()

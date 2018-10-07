@@ -5,91 +5,149 @@ var { spawn } = require('child_process')
 var { log } = require('../lib')
 var config = require('../config-loader')
 
-const usage = `vibedb - Play Mode
+const EXIT_COMMANDS = ['quit', 'q', '\\q', 'exit']
+const usage = `
+vibedb play
+===========
 
 Usage:
 
-  vibe [COMMAND]
+  vlc:  change to vlc mode
+  db: change to db mode 
+  mode: return current mode  
+  help: print this message
+  help vlc: get vlc help
 
-  -or-
+Modes:
 
-  Use any valid VLC terminal commands. 
-  Type 'help vlc' or just press enter to get a list vlc commands
+  vlc: Direct access to the VLC cli through the ic interface. 
+  db: Spawn a vibedb child process using a given command.
 
-Commands:
+DB Commands:
 
   None yet!
 `
 
-module.exports = play
+class PlayCommand {
+  constructor () {
+    process.on('SIGINT', () => this.quit())
 
-function play () {
-  var playlist = path.join(config.subdir.playlists, 'all.m3u')
+    this.mode = 'vlc'
+    this.rl = null
+    this.playlist = path.join(config.subdir.playlists, 'all.m3u')
 
-  var vlc = spawn(config.vlc.dir, [ '-I', 'rc', playlist ], {
-    stdio: [ 'pipe', 'inherit', 'ignore' ]
-  })
+    const cmd = config.vlc.bin
+    const args = [ '-I', 'rc', this.playlist ]
 
-  vlc.on('error', err => console.log(err))
+    this.vlc = spawn(cmd, args, {
+      stdio: [ 'pipe', 'inherit', 'ignore' ]
+    })
 
-  return recursivePrompt()
+    this.vlc.on('error', err => console.log(err))
+    this.vlc.on('close', (code, signal) => process.exit())
 
-  function recursivePrompt () {
-    var cursor = '$ '
+    this.listen()
+  }
 
-    prompt(cursor, command => {
-      var args = command.split(' ')
+  listen () {
+    this.resetCursor()
 
-      switch (args[0]) {
-        case 'help':
-          if (args[1] === 'vlc') {
-            vlc.stdin.write('help' + '\n')
-          } else {
-            log(usage)
-          }
-          break
+    this.prompt(this.cursor, query => {
+      this.query = query
+      this.words = query.split(' ')
 
-        case 'vibe':
-          executeCommand(args[1], args.slice(2))
-          break
-
-        case 'quit':
-        case 'q':
-        case '\\q':
-        case 'exit':
-          return quit()
-
-        default:
-          vlc.stdin.write(command + '\n')
-          break
-      }
-
-      recursivePrompt()
+      this.exec()
+      this.listen()
     })
   }
 
-  function executeCommand (cmd, args) {
-    log('command: ' + cmd)
-    log('args: ' + args.join(', '))
+  resetCursor () {
+    if (this.mode === 'exit') return
+
+    this.cursor = this.mode + '> '
+    if (this.rl) this.rl.setPrompt(this.cursor)
   }
 
-  function quit () {
-    vlc.on('close', (code, signal) => {
-      process.exit()
-    })
+  prompt (text, done) {
+    if (this.mode === 'exit') return
 
-    vlc.kill('SIGHUP')
-  }
-
-  function prompt (text, done) {
-    var rl = readline.createInterface({
+    this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
 
-    rl.question(text, command => {
-      rl.close()
+    this.rl.question(text, command => {
+      this.rl.close()
+
       done(command)
     })
   }
+
+  exec () {
+    var cmd = this.words[0]
+    var args = this.words.slice(1)
+
+    if (EXIT_COMMANDS.includes(cmd)) return this.quit()
+    if (cmd === 'mode') return log(this.mode)
+
+    switch (this.mode) {
+      case 'db':
+        if (cmd === 'vlc') return this.setMode(cmd)
+
+        return this.dbCMD(cmd, args)
+
+      case 'vlc':
+        if (cmd === 'db') return this.setMode(cmd)
+
+        return this.vlcCMD(cmd, args)
+
+      default:
+        log(usage)
+        break
+    }
+  }
+
+  dbCMD (cmd, args) {
+    log('db command: ' + cmd)
+    log('args: ' + args.join(', '))
+
+    switch (cmd) {
+      default:
+        log(usage)
+        break
+    }
+  }
+
+  vlcCMD (cmd, args) {
+    if (!cmd && args.length === 0) return this.sendToVLC('')
+
+    this.sendToVLC(this.query)
+  }
+
+  sendToVLC (cmd = '') {
+    this.vlc.stdin.write(cmd + '\n')
+    this.resetCursor()
+  }
+
+  setMode (mode) {
+    this.mode = mode
+  }
+
+  quit () {
+    const MILLISECONDS_BEFORE_SHUTDOWN = 5 * 1000
+
+    log('\nsee you later :)')
+
+    this.mode = 'exit'
+
+    this.vlc.kill('SIGHUP')
+
+    setTimeout(() => {
+      process.exit()
+    }, MILLISECONDS_BEFORE_SHUTDOWN)
+  }
+}
+
+module.exports = function () {
+  return new PlayCommand()
 }

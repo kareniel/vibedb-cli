@@ -33,6 +33,7 @@
     "yn": "^2.0.0"
   },
   "devDependencies": {
+    "nodemon": "^1.18.4",
     "tape": "^4.9.1"
   }
 }
