@@ -15,7 +15,7 @@
 
 #### `cleanup`
 
-flatten $inbox file structure, move unsupported files to $unsupported
+flatten `$inbox` file structure, move unsupported files to `$unsupported`.
 
 
 #### `import`
@@ -26,7 +26,13 @@ respective directory in `$library` following the current
 
 #### `render`
 
-export a m3u file listing every file in $library 
+export a m3u file listing every file in `$library`.
+
+#### `play`
+
+launch playlist using vlc.  
+runs with an interactive prompt connected to the rc interface.  
+defaults to playing all files in `$library`.
 
 
 ## Reference
