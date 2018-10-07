@@ -108,9 +108,6 @@ class PlayCommand {
   }
 
   dbCMD (cmd, args) {
-    log('db command: ' + cmd)
-    log('args: ' + args.join(', '))
-
     switch (cmd) {
       default:
         log(usage)
