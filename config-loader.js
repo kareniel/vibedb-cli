@@ -8,7 +8,8 @@ var untildify = require('untildify')
 
 var { log } = require('./lib')
 const CUSTOM_CONFIG_DIR = path.join(os.homedir(), '.vibedb')
-const defaultConfig = yaml.safeLoad(fs.readFileSync('./config.yaml'))
+const configFile = fs.readFileSync(path.join(__dirname, './config.yaml'))
+const defaultConfig = yaml.safeLoad(configFile)
 
 var config
 

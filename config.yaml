@@ -1,3 +1,6 @@
 version: 0.1
 
 dir: ~/Dropbox/Apps/Vibedrive
+
+vlc:
+  dir: '/Applications/VLC.app/Contents/MacOS/VLC'

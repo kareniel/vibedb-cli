@@ -11,6 +11,7 @@ Commands:
   - cleanup: flatten $inbox file structure, move unsupported files to $unsupported 
   - import: move music files from $inbox to a subdirectory in $library
   - render: export a m3u file listing every file in $library 
+  - play: launch playlist using vlc running with a prompt to the rc interface 
 `))
 
 function main (cli) {
@@ -21,6 +22,8 @@ function main (cli) {
       return require('./commands/import')()
     case 'render':
       return require('./commands/render')()
+    case 'play':
+      return require('./commands/play')()
     default:
       return console.log(cli.help)
   }
