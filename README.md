@@ -1,6 +1,12 @@
 # vibedb-cli
 
 
+## Requirements
+
+- *nix
+- Node.js 8.x
+- VLC
+
 
 ## Installation
 
@@ -8,11 +14,9 @@
 2. `cd vibedb-cli && npm link`
 
 
-
 ## Usage
 
 `vibedb COMMAND`
-
 
 
 ## Commands
@@ -38,9 +42,7 @@ runs with an interactive prompt connected to the rc interface.
 defaults to playing all files in `$library`.
 
 
-
 ## Reference
-
 
 #### Configuration
 
