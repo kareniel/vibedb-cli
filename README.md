@@ -1,4 +1,5 @@
-# Vibedrive Tools
+# vibedb-cli
+
 
 
 ## Installation
@@ -7,16 +8,18 @@
 2. `cd vibedb-cli && npm link`
 
 
+
 ## Usage
 
 `vibedb COMMAND`
 
-### Commands
+
+
+## Commands
 
 #### `cleanup`
 
 flatten `$inbox` file structure, move unsupported files to `$unsupported`.
-
 
 #### `import`
 
@@ -35,14 +38,17 @@ runs with an interactive prompt connected to the rc interface.
 defaults to playing all files in `$library`.
 
 
+
 ## Reference
 
-### Configuration
+
+#### Configuration
 
 Create a yaml file called .vibedb in your home directory.
 If this file is not found, [`config.yaml`](./config.yaml) will be used. 
 
-### Music Folder
+
+#### Music Folder
 
 Default path: `~/Dropbox/Apps/Vibedrive` 
 
@@ -54,7 +60,7 @@ Subfolders:
 - **`/Playlists`**: Contains [`render`](#render)ed playlist (.m3u) files.
 
 
-### Library Directory Structure
+#### Library Directory Structure
 
 The current structure of `$library` is:
 
@@ -71,3 +77,10 @@ where:
 - `$prefix` = first 3 characters of $multihash
 - `$multihash` = ipfs hash of file
 
+---
+
+## License
+
+[MIT License](./LICENSE)
+
+Copyright (c) 2018 Jonathan Dupré
