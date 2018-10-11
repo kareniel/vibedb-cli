@@ -2,16 +2,15 @@
 
 var meow = require('meow')
 
-main(meow(`
-Usage: 
-$ vibedb [COMMAND]
+main(meow(`Usage: vibedb [-version] [-help] <command> [args]
+
+The available commands for execution are listed below.
 
 Commands:
-
-  - cleanup: flatten $inbox file structure, move unsupported files to $unsupported 
-  - import: move music files from $inbox to a subdirectory in $library
-  - render: export a m3u file listing every file in $library 
-  - play: launch playlist using vlc running with a prompt to the rc interface 
+  cleanup   flatten $inbox file structure, move unsupported files to $unsupported 
+  import    move music files from $inbox to a subdirectory in $library
+  render    export a m3u file listing every file in $library 
+  play:     launch playlist using vlc running with a prompt to the rc interface 
 `))
 
 function main (cli) {

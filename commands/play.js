@@ -1,50 +1,37 @@
-var path = require('path')
 var readline = require('readline')
-var { spawn } = require('child_process')
 
 var { log } = require('../lib')
-var config = require('../config-loader')
+var dbModule = require('./db')
+var vlcModule = require('./vlc')
 
-const EXIT_COMMANDS = ['quit', 'q', '\\q', 'exit']
+const EXIT_COMMANDS = ['quit', 'q', '\\q', 'exit', 'close']
+const VLC_PASSTHROUGH_CMDS = ['play', 'pause', 'prev', 'next', 'info']
+const MILLISECONDS_BEFORE_SHUTDOWN = 5 * 1000
 const usage = `
-vibedb play
+vibedb console
 ===========
 
 Usage:
 
+  help: print this message
+  help db: list db commands
+  help vlc: send 'help' command to VLC
   vlc:  change to vlc mode
   db: change to db mode 
   mode: return current mode  
-  help: print this message
-  help vlc: get vlc help
 
 Modes:
 
   vlc: Direct access to the VLC cli through the ic interface. 
   db: Spawn a vibedb child process using a given command.
-
-DB Commands:
-
-  None yet!
 `
 
 class PlayCommand {
   constructor () {
     process.on('SIGINT', () => this.quit())
 
-    this.mode = 'vlc'
+    this.mode = 'db'
     this.rl = null
-    this.playlist = path.join(config.subdir.playlists, 'all.m3u')
-
-    const cmd = config.vlc.bin
-    const args = [ '-I', 'rc', this.playlist ]
-
-    this.vlc = spawn(cmd, args, {
-      stdio: [ 'pipe', 'inherit', 'ignore' ]
-    })
-
-    this.vlc.on('error', err => console.log(err))
-    this.vlc.on('close', (code, signal) => process.exit())
 
     this.listen()
   }
@@ -89,40 +76,32 @@ class PlayCommand {
 
     if (EXIT_COMMANDS.includes(cmd)) return this.quit()
     if (cmd === 'mode') return log(this.mode)
+    if (cmd === 'help') {
+      if (!args.length) return log(usage)
+      if (args[0] === 'db') return dbModule.help()
+      if (args[0] === 'vlc') return vlcModule.help()
+    }
 
     switch (this.mode) {
       case 'db':
         if (cmd === 'vlc') return this.setMode(cmd)
+        if (VLC_PASSTHROUGH_CMDS.includes(cmd)) {
+          return vlcModule.execute(cmd, args)
+        }
 
-        return this.dbCMD(cmd, args)
+        return dbModule.execute(cmd, args)
 
       case 'vlc':
         if (cmd === 'db') return this.setMode(cmd)
+        if (!cmd && args.length === 0) return vlcModule.execute('')
 
-        return this.vlcCMD(cmd, args)
+        return vlcModule.execute(cmd, args)
 
       default:
         log(usage)
         break
     }
-  }
 
-  dbCMD (cmd, args) {
-    switch (cmd) {
-      default:
-        log(usage)
-        break
-    }
-  }
-
-  vlcCMD (cmd, args) {
-    if (!cmd && args.length === 0) return this.sendToVLC('')
-
-    this.sendToVLC(this.query)
-  }
-
-  sendToVLC (cmd = '') {
-    this.vlc.stdin.write(cmd + '\n')
     this.resetCursor()
   }
 
@@ -131,13 +110,11 @@ class PlayCommand {
   }
 
   quit () {
-    const MILLISECONDS_BEFORE_SHUTDOWN = 5 * 1000
-
-    log('\nsee you later :)')
-
     this.mode = 'exit'
 
-    this.vlc.kill('SIGHUP')
+    vlcModule.close()
+
+    log('\nsee you later :)')
 
     setTimeout(() => {
       process.exit()
